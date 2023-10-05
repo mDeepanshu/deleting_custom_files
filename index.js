@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-function deleteVttFilesInDirectory(directoryPath) {
+function deleteVttFilesRecursively(directoryPath) {
 	fs.readdir(directoryPath, (err, files) => {
 		if (err) {
 			console.error(`Error reading directory: ${err}`);
@@ -11,15 +11,26 @@ function deleteVttFilesInDirectory(directoryPath) {
 		files.forEach((file) => {
 			const filePath = path.join(directoryPath, file);
 
-			if (path.extname(file) === ".vtt") {
-				fs.unlink(filePath, (unlinkErr) => {
-					if (unlinkErr) {
-						console.error(`Error deleting file ${filePath}: ${unlinkErr}`);
-					} else {
-						console.log(`Deleted file: ${filePath}`);
-					}
-				});
-			}
+			fs.stat(filePath, (statErr, stats) => {
+				if (statErr) {
+					console.error(`Error reading file stats: ${statErr}`);
+					return;
+				}
+
+				if (stats.isDirectory()) {
+					// If it's a directory, recursively search it
+					deleteVttFilesRecursively(filePath);
+				} else if (path.extname(file) === ".txt" && !file.includes("English")) {
+					// If it's a .vtt file and doesn't contain 'English' in its name, delete it
+					fs.unlink(filePath, (unlinkErr) => {
+						if (unlinkErr) {
+							console.error(`Error deleting file ${filePath}: ${unlinkErr}`);
+						} else {
+							console.log(`Deleted file: ${filePath}`);
+						}
+					});
+				}
+			});
 		});
 	});
 }
@@ -31,4 +42,4 @@ if (!inputDirectory) {
 	process.exit(1);
 }
 
-deleteVttFilesInDirectory(inputDirectory);
+deleteVttFilesRecursively(inputDirectory);
