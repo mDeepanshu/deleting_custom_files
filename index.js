@@ -20,7 +20,7 @@ function deleteVttFilesRecursively(directoryPath) {
 				if (stats.isDirectory()) {
 					// If it's a directory, recursively search it
 					deleteVttFilesRecursively(filePath);
-				} else if (path.extname(file) === ".txt" && !file.includes("English")) {
+				} else if (path.extname(file) === ".vtt" && !file.includes("English")) {
 					// If it's a .vtt file and doesn't contain 'English' in its name, delete it
 					fs.unlink(filePath, (unlinkErr) => {
 						if (unlinkErr) {
